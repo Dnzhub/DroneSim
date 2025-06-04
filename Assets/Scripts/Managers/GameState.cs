@@ -29,5 +29,6 @@ public class GameState : MonoBehaviour
     private void StartSimulation()
     {
         _droneManager.SpawnDrones();
+        ResourceManager.Instance.SpawnResource();
     }
 }

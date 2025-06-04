@@ -9,6 +9,9 @@ public class DroneManager : MonoBehaviour
     [SerializeField] private int _blueTeamDroneCount = 2;
     [SerializeField] private BaseController _redBase, _blueBase;
     [SerializeField] private float _droneSpeed = 10;
+    [SerializeField] private float _spawnRangeX = 20f;
+    [SerializeField] private float _spawnRangeZ = 20f;
+    [SerializeField] private LayerMask _spawnBlockingLayers;
 
     private List<DroneController> _allDrones = new List<DroneController>();
 
@@ -28,26 +31,15 @@ public class DroneManager : MonoBehaviour
     private void SpawnDrone(Faction faction, BaseController baseTransform)
     {
 
-        Vector3 spawnPosition = SelectRandomPosAroundBase(baseTransform);
-        Quaternion forwardDir = RotateTowardBaseForward(baseTransform);
+        Vector3 spawnPosition = Utils.FindValidPosition(baseTransform.transform, _spawnRangeX, _spawnRangeZ, _spawnBlockingLayers);
+        Quaternion forwardDir = Utils.GetTargetsForward(baseTransform.transform);
+
         var droneObj = Instantiate(faction == Faction.Red ? _redDronePrefab : _blueDronePrefab, spawnPosition, forwardDir);
         var drone = droneObj.GetComponent<DroneController>();
-        drone.Initialize(faction, _droneSpeed);
+        drone.Initialize(faction, _droneSpeed, baseTransform.transform);
         _allDrones.Add(drone);
     }
-    private Vector3 SelectRandomPosAroundBase(BaseController target)
-    {
-        Vector2 randomPoint = Random.insideUnitCircle * target.DroneSpawnRadius;
-         return new Vector3(
-          target.transform.position.x + randomPoint.x,
-          target.transform.position.y,
-          target.transform.position.z + randomPoint.y
-         );
-    }
-    private Quaternion RotateTowardBaseForward(BaseController target)
-    {
-        return Quaternion.Euler(0, target.transform.eulerAngles.y, 0);
-    }
+
     public void UpdateDroneSpeeds(float newSpeed)
     {
         foreach (var drone in _allDrones)
@@ -55,6 +47,10 @@ public class DroneManager : MonoBehaviour
             //drone.SetSpeed(newSpeed);
         }
     }
+    private void OnDrawGizmosSelected()
+    {
+        Utils.DrawCubeAtLocation(_redBase.transform, _spawnRangeX, _spawnRangeZ, Color.red);
+        Utils.DrawCubeAtLocation(_blueBase.transform, _spawnRangeX, _spawnRangeZ, Color.blue);
+    }
 
- 
 }
