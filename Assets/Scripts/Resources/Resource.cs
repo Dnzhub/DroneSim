@@ -2,15 +2,17 @@ using UnityEngine;
 
 public class Resource : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public bool IsClaimed  = false;
+
+    public void Claim()
     {
-        
+        IsClaimed = true;
+        Debug.Log($"{gameObject.name} claimed!");
     }
 
-    // Update is called once per frame
-    void Update()
+    public void UnClaim()
     {
-        
+        IsClaimed=false;
     }
+  
 }

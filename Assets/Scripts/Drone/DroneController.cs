@@ -5,36 +5,50 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class DroneController : MonoBehaviour
 {
+    
     private Faction _faction;
-    private Transform _homeBase;
+    private BaseController _homeBase;
+    public BaseController HomeBase => _homeBase;
+    public Resource TargetResource { get; set; }
 
-    private NavMeshAgent agent;
+    private LayerMask _blockingLayers;
+    public LayerMask BlockingLayers => _blockingLayers;
+     
+
+    private NavMeshAgent _agent;
+    public NavMeshAgent Agent
+    {
+        get { if (_agent == null) _agent = GetComponent<NavMeshAgent>(); return _agent; }
+       
+    }
     private IDroneState _currentState;
     private DroneSearchingState _searchState;
-    //private CollectState _collectState;
-    //private ReturnState _returnState;
+    private DroneCollectState _collectState;
+    private DroneReturnState _returnState;
 
-    private void Awake()
-    {
-        _searchState = new DroneSearchingState(this);
-        //_collectState = new CollectState(this);
-        //_returnState = new ReturnState(this);
-    }
+
+    public IDroneState GetSearchState() => _searchState;
+    public IDroneState GetCollectState() => _collectState;
+    public IDroneState GetReturnState() => _returnState;
+
     private void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
+       
+        _agent = GetComponent<NavMeshAgent>();
     }
-    public void Initialize(Faction faction, float speed, Transform homeBase)
+    public void Initialize(Faction faction, float speed, BaseController homeBase,LayerMask blockLayers)
     {
         this._faction = faction;
         this._homeBase = homeBase;
+        this._blockingLayers = blockLayers;
+        _searchState = new DroneSearchingState(this);
+        _collectState = new DroneCollectState(this);
+        _returnState = new DroneReturnState(this);
 
-
-        if (agent != null)
-        {
-            agent.speed = speed;
-            agent.avoidancePriority = Random.Range(30, 60); // Optional
-        }
+        Agent.speed = speed;
+        Agent.avoidancePriority = Random.Range(30, 60); // Optional
+        Agent.stoppingDistance = 3;
+        Agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
         SwitchState(_searchState);
 
     }
@@ -51,7 +65,18 @@ public class DroneController : MonoBehaviour
         _currentState.EnterState();
     }
 
+    public void MoveToTarget(Vector3 target)
+    {
+        _agent.SetDestination(target);
+    }
+    public bool HasReachedDestination()
+    {
+        if (!Agent.hasPath || Agent.pathPending)
+            return false;
 
+        return Agent.remainingDistance <= Agent.stoppingDistance &&
+               Agent.velocity.sqrMagnitude < 0.01f;
+    }
 
 
 }

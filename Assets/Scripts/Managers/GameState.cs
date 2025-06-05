@@ -4,15 +4,34 @@ public class GameState : MonoBehaviour
 {
     public static GameState Instance { get; private set; }
 
-    [SerializeField] private DroneManager _droneManager;
+    private DroneManager _droneManager;
+    private ResourceManager _resourceManager;
 
-    private void OnValidate()
+    public DroneManager DroneManager
     {
-        if (!_droneManager /*|| !resourceManager || !uiManager*/)
+        get
         {
-            Debug.LogWarning("GameState is missing manager references!");
+            if (_droneManager == null)
+            {
+                _droneManager = GetComponent<DroneManager>();
+              
+            }
+            return _droneManager;
         }
     }
+    public ResourceManager ResourceManager
+    {
+        get
+        {
+            if (_resourceManager == null)
+            {
+                _resourceManager = GetComponent<ResourceManager>();
+
+            }
+            return _resourceManager;
+        }
+    }
+  
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -21,6 +40,9 @@ public class GameState : MonoBehaviour
             return;
         }
         Instance = this;
+       
+        _droneManager = GetComponent<DroneManager>();
+        _resourceManager = GetComponent<ResourceManager>();
     }
     private void Start()
     {
@@ -29,6 +51,6 @@ public class GameState : MonoBehaviour
     private void StartSimulation()
     {
         _droneManager.SpawnDrones();
-        ResourceManager.Instance.SpawnResource();
+        _resourceManager.SpawnResource();
     }
 }
