@@ -1,21 +1,39 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Audio;
 
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class DroneController : MonoBehaviour
 {
-    
+    [Tooltip("Drone faction")]
     private Faction _faction;
     public Faction DroneFaction => _faction;
+
     private BaseController _homeBase;
     public BaseController HomeBase => _homeBase;
-    public Resource TargetResource { get; set; }
+    public Resource TargetResource { get; set; }  
 
     private LayerMask _blockingLayers;
     public LayerMask BlockingLayers => _blockingLayers;
 
+    [Header("VFX")]
+    public ParticleSystem AuraParticleEffect;
+    public GameObject CollectParticleEffect;
+    [Header("SFX")]
+    public AudioSource MomentaryAudioSource;
+    public AudioSource LoopAudioSource;
+    public AudioClip CollectAudioClip;
+
+    [Tooltip("Maximum volume when agent is at max speed")]
+    private float _maxLoopVolume = 1f;
+
+    [Tooltip("Minimum velocity to consider agent as moving")]
+    private float movementThreshold = 0.1f;
+    private float _fadeSpeed = 25f;
+
+    [Tooltip("Debug current path for navmesh")]
     private LineRenderer _pathLineRenderer;
     public bool RenderPath { get; set; } = false;
 
@@ -40,8 +58,10 @@ public class DroneController : MonoBehaviour
        
         _agent = GetComponent<NavMeshAgent>();
         _pathLineRenderer = GetComponent<LineRenderer>();
-        _pathLineRenderer.positionCount = 0;
-        _pathLineRenderer.enabled = false;
+      
+        InitDronePath();
+        LoopAudioSource.volume = 0f;
+        LoopAudioSource.Play();
 
     }
     public void Initialize(Faction faction, float speed, BaseController homeBase)
@@ -52,10 +72,7 @@ public class DroneController : MonoBehaviour
         _collectState = new DroneCollectState(this);
         _returnState = new DroneReturnState(this);
 
-        Agent.speed = speed;
-        Agent.avoidancePriority = Random.Range(30, 60); // Optional
-        Agent.stoppingDistance = 3;
-        Agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        SetAgentAttributes(speed);
         SwitchState(_searchState);
 
     }
@@ -67,6 +84,8 @@ public class DroneController : MonoBehaviour
             RenderDronePath();
         else if (_pathLineRenderer.enabled)
             _pathLineRenderer.enabled = false;
+
+        PlayMovementSFX();
     }
 
     public void SwitchState(IDroneState newState)
@@ -74,6 +93,18 @@ public class DroneController : MonoBehaviour
         _currentState?.ExitState();
         _currentState = newState;
         _currentState.EnterState();
+    }
+    private void SetAgentAttributes(float speed)
+    {
+        Agent.speed = speed;
+        Agent.avoidancePriority = Random.Range(30, 60); // Optional
+        Agent.stoppingDistance = 3;
+        Agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+    }
+    private void InitDronePath()
+    {
+        _pathLineRenderer.positionCount = 0;
+        _pathLineRenderer.enabled = false;
     }
     public void SetSpeed(int speed)
     {
@@ -86,8 +117,7 @@ public class DroneController : MonoBehaviour
     }
     public bool HasReachedDestination()
     {
-        if (!Agent.hasPath || Agent.pathPending)
-            return false;
+       
 
         return Agent.remainingDistance <= Agent.stoppingDistance &&
                Agent.velocity.sqrMagnitude < 0.01f;
@@ -111,6 +141,39 @@ public class DroneController : MonoBehaviour
     public void StartStateCoroutine(IEnumerator coroutine)
     {
         StartCoroutine(coroutine);
+    }
+
+    public void SpawnParticleAtPosition(GameObject effect,Vector3 targetPosition, float destroyTime)
+    {
+        GameObject particleInstance = Instantiate(CollectParticleEffect, targetPosition, Quaternion.identity);
+
+        Destroy(particleInstance, destroyTime);
+    }
+
+    public void PlayMovementSFX()
+    {
+        float speed = _agent.velocity.magnitude;
+
+        // Target volume based on whether agent is moving
+        float targetVolume = speed > movementThreshold ? _maxLoopVolume : 0f;
+
+        // Smoothly fade volume
+        LoopAudioSource.volume = Mathf.Lerp(LoopAudioSource.volume, targetVolume, Time.deltaTime * _fadeSpeed);
+    }
+
+    public void PlaySFXOnce(AudioClip clip)
+    {
+        MomentaryAudioSource.clip = clip;
+        if(!MomentaryAudioSource.isPlaying) MomentaryAudioSource.Play();
+
+    }
+    public void PlayVFX(ParticleSystem effect)
+    {
+        effect.Play();
+    }
+    public void StopVFX(ParticleSystem effect)
+    {
+        effect.Stop();
     }
 }
 

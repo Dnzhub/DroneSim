@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class GameState : MonoBehaviour
-{
+{ 
     public static GameState Instance { get; private set; }
+    public bool HasSimulationStarted { get; private set; } = false;
     public event Action<Faction,int> OnScoreIncrement;
     private DroneManager _droneManager;
     private ResourceManager _resourceManager;
@@ -60,6 +61,7 @@ public class GameState : MonoBehaviour
         }
         Instance = this;
 
+        HasSimulationStarted = false;
         InitializeScoreKeeper();
       
     }
@@ -67,7 +69,7 @@ public class GameState : MonoBehaviour
    
     public void StartSimulation()
     {
-
+        HasSimulationStarted = true;
         DroneManager.SpawnDrones(UIManager.DroneCountSlider.value);
         ResourceManager.SpawnResource();
     }

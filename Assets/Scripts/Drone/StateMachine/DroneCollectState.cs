@@ -19,6 +19,8 @@ public class DroneCollectState : IDroneState
         _timer = _collectDuration;
         _drone.Agent.updateRotation = false;
 
+        _drone.SpawnParticleAtPosition(_drone.CollectParticleEffect, _drone.TargetResource.transform.position, _gameState.UIManager.ResourceGenerationFrequency.value);
+        _drone.PlaySFXOnce(_drone.CollectAudioClip);
     }
 
 
@@ -42,6 +44,7 @@ public class DroneCollectState : IDroneState
     }
     public void ExitState()
     {
+        _drone.PlayVFX(_drone.AuraParticleEffect);
         _drone.Agent.updateRotation = true;
 
     }

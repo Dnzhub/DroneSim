@@ -29,6 +29,8 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         _root = _uiDoc.rootVisualElement;
+    
+
         _redTeamScore = _root.Q<Label>("RedScore");
         _blueTeamScore = _root.Q<Label>("BlueScore");
         _droneCount = _root.Q<Label>("DroneCountLabel");
@@ -42,6 +44,15 @@ public class UIManager : MonoBehaviour
         //It causes race condition DO NOT bind it on enable!
         GameState.Instance.OnScoreIncrement += UpdateScore;
 
+        _root.focusable = false;
+        _root.pickingMode = PickingMode.Ignore;
+        // Find all sliders and disable their focus/key input
+        var sliders = _root.Query<SliderInt>().ToList();
+        foreach (var slider in sliders)
+        {
+            slider.focusable = false;  // Prevent focus
+            slider.pickingMode = PickingMode.Ignore; // Prevent input capture
+        }
 
 
         if (_droneCountSlider != null)
