@@ -8,7 +8,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] UIDocument _uiDoc;
     private VisualElement _root;
 
-
+    [Header("UI Elements")]
     private Label _redTeamScore;
     private Label _blueTeamScore;
     private Label _droneCount;
@@ -18,7 +18,6 @@ public class UIManager : MonoBehaviour
     private SliderInt _droneSpeedSlider;
     private FloatField _resourceGenerationFrequency;
     private Toggle _showPathRender;
-
     public SliderInt DroneCountSlider => _droneCountSlider;
     public SliderInt DroneSpeedSlider => _droneSpeedSlider;
 
@@ -29,8 +28,6 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         _root = _uiDoc.rootVisualElement;
-    
-
         _redTeamScore = _root.Q<Label>("RedScore");
         _blueTeamScore = _root.Q<Label>("BlueScore");
         _droneCount = _root.Q<Label>("DroneCountLabel");
@@ -40,13 +37,10 @@ public class UIManager : MonoBehaviour
         _droneSpeedSlider = _root.Q<SliderInt>("DroneSpeedSlider");
         _resourceGenerationFrequency = _root.Q<FloatField>("ResourceFrequency");
         _showPathRender = _root.Q<Toggle>("PathRenderToggle");
-        _startButton.clicked += OnStartButtonClicked;
         //It causes race condition DO NOT bind it on enable!
         GameState.Instance.OnScoreIncrement += UpdateScore;
-
         _root.focusable = false;
         _root.pickingMode = PickingMode.Ignore;
-        // Find all sliders and disable their focus/key input
         var sliders = _root.Query<SliderInt>().ToList();
         foreach (var slider in sliders)
         {
@@ -54,6 +48,8 @@ public class UIManager : MonoBehaviour
             slider.pickingMode = PickingMode.Ignore; // Prevent input capture
         }
 
+        //UI bindings
+        _startButton.clicked += OnStartButtonClicked;
 
         if (_droneCountSlider != null)
         {

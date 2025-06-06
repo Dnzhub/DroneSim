@@ -11,14 +11,10 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private int _totalResourceCount = 10;
     [SerializeField] private float _spawnRangeX = 20f;
     [SerializeField] private float _spawnRangeZ = 20f;
+    [SerializeField] private List<Resource> _resourcePrefabs = new List<Resource>();
+    private List<Resource> _activeResources = new List<Resource>();
     public float spawnRangeX => _spawnRangeX;
     public float spawnRangeZ => _spawnRangeZ;
-
-    [SerializeField] private List<Resource> _resourcePrefabs = new List<Resource>();
-
-
-    private List<Resource> _activeResources = new List<Resource>();
-
 
     public void SpawnResource()
     {
@@ -29,7 +25,6 @@ public class ResourceManager : MonoBehaviour
             Resource newResource = Instantiate(GetRandomResourcePrefab(), position, Quaternion.identity);     
             _activeResources.Add(newResource);
         }
-    
     }
 
     private Resource GetRandomResourcePrefab()
@@ -87,7 +82,7 @@ public class ResourceManager : MonoBehaviour
 
     public IEnumerator RespawnResource(Resource resource,float time)
     {
-        yield return new WaitForSeconds(time); // Wait for collection
+        yield return new WaitForSeconds(time); 
         resource.transform.position = Utils.FindValidPosition(
             transform,
             spawnRangeX,

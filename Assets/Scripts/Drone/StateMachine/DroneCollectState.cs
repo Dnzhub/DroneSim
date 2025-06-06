@@ -7,7 +7,7 @@ public class DroneCollectState : IDroneState
     private DroneController _drone;
     private float _collectDuration = 2f;
     private float _timer;
-    private float rotationSpeed = 5f;
+    private float _rotationSpeed = 5f;
 
     public DroneCollectState(DroneController drone)
     {
@@ -26,7 +26,7 @@ public class DroneCollectState : IDroneState
 
     public void UpdateState()
     {
-        RotateTowardTarget();
+        _drone.RotateTowardTarget(_rotationSpeed);
         _timer -= Time.deltaTime;
         if (_timer <= 0f)
         {
@@ -37,9 +37,7 @@ public class DroneCollectState : IDroneState
             }
             _drone.SwitchState(_drone.GetReturnState());
     
-        }
-
-      
+        }   
 
     }
     public void ExitState()
@@ -49,19 +47,5 @@ public class DroneCollectState : IDroneState
 
     }
 
-    private void RotateTowardTarget()
-    {
-        Vector3 direction = _drone.TargetResource.transform.position - _drone.Agent.transform.position;
-        direction.y = 0f;
 
-        if (direction.sqrMagnitude > 0.001f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            _drone.Agent.transform.rotation = Quaternion.Slerp(
-                _drone.Agent.transform.rotation,
-                targetRotation,
-                rotationSpeed * Time.deltaTime
-            );
-        }
-    }
 }

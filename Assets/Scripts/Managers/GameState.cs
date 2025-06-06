@@ -7,12 +7,11 @@ public class GameState : MonoBehaviour
     public static GameState Instance { get; private set; }
     public bool HasSimulationStarted { get; private set; } = false;
     public event Action<Faction,int> OnScoreIncrement;
+    
     private DroneManager _droneManager;
     private ResourceManager _resourceManager;
     private UIManager _uiManager;
-
     private Dictionary<Faction, int> _factionScores = new();
-
 
     public DroneManager DroneManager
     {
@@ -89,7 +88,6 @@ public class GameState : MonoBehaviour
 
         _factionScores[faction]++;
         OnScoreIncrement?.Invoke(faction,_factionScores[faction]);
-        //UIManager.Instance.UpdateScore(faction, _factionScores[faction]);
     }
 
     public void UpdateDroneSpeed(int speed)
@@ -103,7 +101,4 @@ public class GameState : MonoBehaviour
         DroneManager.SpawnDrones(newCount);
 
     }
-
-  
-
 }

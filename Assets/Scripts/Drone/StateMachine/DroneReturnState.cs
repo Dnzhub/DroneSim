@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using UnityEngine;
 
 public class DroneReturnState : IDroneState
@@ -15,32 +13,22 @@ public class DroneReturnState : IDroneState
     }
     public void EnterState()
     {
-        _drone.MoveToTarget(_drone.HomeBase.transform.position);
-        
-
+        _drone.MoveToTarget(_drone.HomeBase.transform.position);        
     }
-
-
     public void UpdateState()
     {
-        // Delay HasReachedDestination until we are sure the agent has a path
         if (_drone.HasReachedDestination())
         {
             _drone.SwitchState(_drone.GetSearchState());
-
         }
     }
     public void ExitState()
     {
-
         float respawnFrequency = _gameState.UIManager.ResourceGenerationFrequency.value;
         _drone.StartStateCoroutine(_gameState.ResourceManager.RespawnResource(_drone.TargetResource, respawnFrequency));
         _gameState.IncrementFactionScore(_drone.DroneFaction);
         _drone.StopVFX(_drone.AuraParticleEffect);
-        _drone.TargetResource = null;
-        
+        _drone.TargetResource = null;      
     }
-
-
 
 }

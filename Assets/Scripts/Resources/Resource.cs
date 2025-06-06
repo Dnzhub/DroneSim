@@ -4,8 +4,9 @@ using UnityEngine;
 public class Resource : MonoBehaviour
 {
     public bool IsClaimed  = false;
+   
     private float _stepDuration = 1f;
-    private float _rotationSpeed = 90f; // Degrees per second
+    private float _rotationSpeed = 90f; 
     private GameObject _visual;
 
     private void Start()

@@ -61,7 +61,7 @@ Each `DroneController` has a state machine that holds:
 
 ## 🛠️ Tools & Approaches Used
 
-- **Unity 2022 LTS**
+- **Unity 6.0.37f1 LTS**
 - **UI Toolkit** (`UIDocument`) for runtime parameter configuration
 - **LineRenderer** for path visualization
 - **NavMesh or custom logic** for movement 

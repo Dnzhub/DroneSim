@@ -115,6 +115,21 @@ public class DroneController : MonoBehaviour
     {
         _agent.SetDestination(target);
     }
+    public void RotateTowardTarget(float rotationSpeed)
+    {
+        Vector3 direction = TargetResource.transform.position - Agent.transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            Agent.transform.rotation = Quaternion.Slerp(
+                Agent.transform.rotation,
+                targetRotation,
+                rotationSpeed * Time.deltaTime
+            );
+        }
+    }
     public bool HasReachedDestination()
     {
        

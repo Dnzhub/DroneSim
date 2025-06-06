@@ -21,12 +21,7 @@ public class DroneSearchingState : IDroneState
             _drone.MoveToTarget(_drone.TargetResource.transform.position);
              
         }
-     
-
-
     }
-
-    
 
     public void UpdateState()
     {
@@ -49,7 +44,5 @@ public class DroneSearchingState : IDroneState
     }
     public void ExitState()
     {
-
     }
-  
 }

@@ -40,11 +40,15 @@ public class DroneManager : MonoBehaviour
             drone.RenderPath = show;
         }
     }
-
+    public void UpdateDroneSpeeds(int newSpeed)
+    {
+        foreach (var drone in _allDrones)
+        {
+            drone.SetSpeed(newSpeed);
+        }
+    }
     private void SpawnDrone(Faction faction, BaseController baseTransform)
     {
-       
-
         Vector3 spawnPosition = Utils.FindValidPosition(baseTransform.transform, _spawnRangeX, _spawnRangeZ, _spawnBlockingLayers);
         Quaternion forwardDir = Utils.GetTargetsForward(baseTransform.transform);
 
@@ -54,13 +58,7 @@ public class DroneManager : MonoBehaviour
         _allDrones.Add(drone);
     }
 
-    public void UpdateDroneSpeeds(int newSpeed)
-    {
-        foreach (var drone in _allDrones)
-        {
-            drone.SetSpeed(newSpeed);
-        }
-    }
+ 
     private void OnDrawGizmosSelected()
     {
         Utils.DrawCubeAtLocation(_redBase.transform, _spawnRangeX, _spawnRangeZ, Color.red);
