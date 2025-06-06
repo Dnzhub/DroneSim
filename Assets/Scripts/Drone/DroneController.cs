@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -7,13 +8,16 @@ public class DroneController : MonoBehaviour
 {
     
     private Faction _faction;
+    public Faction DroneFaction => _faction;
     private BaseController _homeBase;
     public BaseController HomeBase => _homeBase;
     public Resource TargetResource { get; set; }
 
     private LayerMask _blockingLayers;
     public LayerMask BlockingLayers => _blockingLayers;
-     
+
+    private LineRenderer _pathLineRenderer;
+    public bool RenderPath { get; set; } = false;
 
     private NavMeshAgent _agent;
     public NavMeshAgent Agent
@@ -35,12 +39,15 @@ public class DroneController : MonoBehaviour
     {
        
         _agent = GetComponent<NavMeshAgent>();
+        _pathLineRenderer = GetComponent<LineRenderer>();
+        _pathLineRenderer.positionCount = 0;
+        _pathLineRenderer.enabled = false;
+
     }
-    public void Initialize(Faction faction, float speed, BaseController homeBase,LayerMask blockLayers)
+    public void Initialize(Faction faction, float speed, BaseController homeBase)
     {
         this._faction = faction;
         this._homeBase = homeBase;
-        this._blockingLayers = blockLayers;
         _searchState = new DroneSearchingState(this);
         _collectState = new DroneCollectState(this);
         _returnState = new DroneReturnState(this);
@@ -56,6 +63,10 @@ public class DroneController : MonoBehaviour
     void Update()
     {
         _currentState?.UpdateState();
+        if (RenderPath)
+            RenderDronePath();
+        else if (_pathLineRenderer.enabled)
+            _pathLineRenderer.enabled = false;
     }
 
     public void SwitchState(IDroneState newState)
@@ -64,7 +75,11 @@ public class DroneController : MonoBehaviour
         _currentState = newState;
         _currentState.EnterState();
     }
+    public void SetSpeed(int speed)
+    {
+        Agent.speed = speed;
 
+    }
     public void MoveToTarget(Vector3 target)
     {
         _agent.SetDestination(target);
@@ -77,7 +92,25 @@ public class DroneController : MonoBehaviour
         return Agent.remainingDistance <= Agent.stoppingDistance &&
                Agent.velocity.sqrMagnitude < 0.01f;
     }
+    private void RenderDronePath()
+    {
+        if (!RenderPath || _agent.path == null || _agent.path.corners.Length == 0)
+            return;
 
+        _pathLineRenderer.enabled = true;
+        _pathLineRenderer.startWidth = 0.2f;
+        _pathLineRenderer.endWidth = 0.2f;
+        _pathLineRenderer.positionCount = _agent.path.corners.Length;
+        _pathLineRenderer.SetPositions(_agent.path.corners);
+    }
+    public void ShowDronePath(bool show)
+    {
+        RenderPath = show;
+    }
 
+    public void StartStateCoroutine(IEnumerator coroutine)
+    {
+        StartCoroutine(coroutine);
+    }
 }
 

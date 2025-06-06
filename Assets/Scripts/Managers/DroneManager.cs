@@ -5,28 +5,40 @@ public class DroneManager : MonoBehaviour
 {
     [SerializeField] private GameObject _redDronePrefab, _blueDronePrefab;
     [SerializeField] private BaseController _redBase, _blueBase;
-    [SerializeField] private int _redTeamDroneCount = 2;
-    [SerializeField] private int _blueTeamDroneCount = 2;
-   
-    [SerializeField] private float _droneSpeed = 10;
     [SerializeField] private float _spawnRangeX = 20f;
     [SerializeField] private float _spawnRangeZ = 20f;
     [SerializeField] private LayerMask _spawnBlockingLayers;
-    public LayerMask BlockingLayers => _spawnBlockingLayers;
 
     private List<DroneController> _allDrones = new List<DroneController>();
 
-    public void SpawnDrones()
+    public void SpawnDrones(int totalCount = 1)
     {
-        for (int i = 0; i < _redTeamDroneCount; i++)
+       
+        for (int i = 0; i < totalCount; i++)
         {
             SpawnDrone(Faction.Red, _redBase);
         }
-        for (int i = 0; i < _blueTeamDroneCount; i++)
+        for (int i = 0; i < totalCount; i++)
         {
             SpawnDrone(Faction.Blue, _blueBase);
         }
 
+    }
+    public void RemoveDrones()
+    {
+        foreach (var drone in _allDrones)
+        {
+            Destroy(drone.gameObject);
+        }
+        _allDrones.Clear();
+    }
+    
+    public void ShowDronesPath(bool show)
+    {
+        foreach (var drone in _allDrones)
+        {
+            drone.RenderPath = show;
+        }
     }
 
     private void SpawnDrone(Faction faction, BaseController baseTransform)
@@ -38,15 +50,15 @@ public class DroneManager : MonoBehaviour
 
         var droneObj = Instantiate(faction == Faction.Red ? _redDronePrefab : _blueDronePrefab, spawnPosition, forwardDir);
         var drone = droneObj.GetComponent<DroneController>();
-        drone.Initialize(faction, _droneSpeed, baseTransform, _spawnBlockingLayers);
+        drone.Initialize(faction, GameState.Instance.UIManager.DroneSpeedSlider.value, baseTransform);
         _allDrones.Add(drone);
     }
 
-    public void UpdateDroneSpeeds(float newSpeed)
+    public void UpdateDroneSpeeds(int newSpeed)
     {
         foreach (var drone in _allDrones)
         {
-            //drone.SetSpeed(newSpeed);
+            drone.SetSpeed(newSpeed);
         }
     }
     private void OnDrawGizmosSelected()

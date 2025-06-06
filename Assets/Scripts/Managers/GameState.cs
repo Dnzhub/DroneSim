@@ -1,11 +1,17 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameState : MonoBehaviour
 {
     public static GameState Instance { get; private set; }
-
+    public event Action<Faction,int> OnScoreIncrement;
     private DroneManager _droneManager;
     private ResourceManager _resourceManager;
+    private UIManager _uiManager;
+
+    private Dictionary<Faction, int> _factionScores = new();
+
 
     public DroneManager DroneManager
     {
@@ -31,7 +37,20 @@ public class GameState : MonoBehaviour
             return _resourceManager;
         }
     }
-  
+
+    public UIManager UIManager
+    {
+        get
+        {
+            if (_uiManager == null)
+            {
+                _uiManager = GetComponent<UIManager>();
+
+            }
+            return _uiManager;
+        }
+    }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -40,17 +59,49 @@ public class GameState : MonoBehaviour
             return;
         }
         Instance = this;
-       
-        _droneManager = GetComponent<DroneManager>();
-        _resourceManager = GetComponent<ResourceManager>();
+
+        InitializeScoreKeeper();
+      
     }
-    private void Start()
+  
+   
+    public void StartSimulation()
     {
-        StartSimulation();
+
+        DroneManager.SpawnDrones(UIManager.DroneCountSlider.value);
+        ResourceManager.SpawnResource();
     }
-    private void StartSimulation()
+
+    private void InitializeScoreKeeper()
     {
-        _droneManager.SpawnDrones();
-        _resourceManager.SpawnResource();
+        foreach (Faction faction in Enum.GetValues(typeof(Faction)))
+        {
+            if (faction == Faction.Neutral) continue;
+            _factionScores[faction] = 0;
+        }
     }
+    public void IncrementFactionScore(Faction faction)
+    {
+        if (!_factionScores.ContainsKey(faction))
+            _factionScores[faction] = 0;
+
+        _factionScores[faction]++;
+        OnScoreIncrement?.Invoke(faction,_factionScores[faction]);
+        //UIManager.Instance.UpdateScore(faction, _factionScores[faction]);
+    }
+
+    public void UpdateDroneSpeed(int speed)
+    {
+        DroneManager.UpdateDroneSpeeds(speed);
+    }
+
+    public void OnDroneCountChanged(int newCount)
+    {
+        DroneManager.RemoveDrones();
+        DroneManager.SpawnDrones(newCount);
+
+    }
+
+  
+
 }

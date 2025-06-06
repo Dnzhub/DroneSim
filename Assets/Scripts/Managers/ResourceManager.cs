@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -84,4 +85,18 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
+    public IEnumerator RespawnResource(Resource resource,float time)
+    {
+        yield return new WaitForSeconds(time); // Wait for collection
+        resource.transform.position = Utils.FindValidPosition(
+            transform,
+            spawnRangeX,
+            spawnRangeZ,
+            _spawnBlockingLayers);
+
+       EnableResource(resource);
+
+        resource.UnClaim();
+    }
+  
 }

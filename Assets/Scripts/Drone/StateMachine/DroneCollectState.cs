@@ -17,7 +17,6 @@ public class DroneCollectState : IDroneState
     public void EnterState()
     {
         _timer = _collectDuration;
-        Debug.Log("Collect State Enter.");
         _drone.Agent.updateRotation = false;
 
     }

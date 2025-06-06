@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 public class DroneReturnState : IDroneState
@@ -5,6 +7,7 @@ public class DroneReturnState : IDroneState
     private GameState _gameState;
     private DroneController _drone;
 
+ 
     public DroneReturnState(DroneController drone)
     {
         this._drone = drone;
@@ -14,7 +17,6 @@ public class DroneReturnState : IDroneState
     {
         _drone.MoveToTarget(_drone.HomeBase.transform.position);
         
-        Debug.Log("Return State Enter.");
 
     }
 
@@ -30,20 +32,13 @@ public class DroneReturnState : IDroneState
     }
     public void ExitState()
     {
-        float spawnRangeX = _gameState.ResourceManager.spawnRangeX;
-        float spawnRangeZ = _gameState.ResourceManager.spawnRangeZ;
-        Transform ResourceSpawnPoint = _gameState.ResourceManager.transform;
-       
-        _drone.TargetResource.transform.position = Utils.FindValidPosition(
-            ResourceSpawnPoint, 
-            spawnRangeX, 
-            spawnRangeZ, 
-            _drone.BlockingLayers);
-       
-         _gameState.ResourceManager.EnableResource(_drone.TargetResource);
-
-        _drone.TargetResource.UnClaim();
+        float respawnFrequency = _gameState.UIManager.ResourceGenerationFrequency.value;
+        _drone.StartStateCoroutine(_gameState.ResourceManager.RespawnResource(_drone.TargetResource, respawnFrequency));
+        _gameState.IncrementFactionScore(_drone.DroneFaction);
         _drone.TargetResource = null;
+        
     }
+
+
 
 }

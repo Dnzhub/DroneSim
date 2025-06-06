@@ -24,7 +24,6 @@ public class DroneSearchingState : IDroneState
      
 
 
-            Debug.Log("Searching State Enter.");
     }
 
     
